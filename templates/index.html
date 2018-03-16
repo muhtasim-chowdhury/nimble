@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+My Chat App
+{% endblock %}
+
+{% block body %}
+
+<h1>Socket IO Chat App</h1>
+
+<form action=" {{ url_for('channels')}}" method="post">
+	<input type="text" name="user" placeholder="Type Your Display name..."><br>
+	<input type="submit" value="Start chatting">
+</form>
+
+
+{% endblock %}
