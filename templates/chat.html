@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Chat
+{% endblock %}
+
+{% block body %}
+
+
+
+<form>
+	<input type="text" name="message" placeholder="Type here..">
+	<button type='submit'>Send</button>
+</form>
+
+
+<script>
+
+// document.addEventListener('DOMContentLoaded', function() {
+// 	// connect to web socket
+// 	var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+
+// 	// when connected, configure buttons
+// 	socket.on('connect', () => {
+// 		document.querySelector('form').onsubmit = function() {
+// 			// console.log(this.firstElementChild.value);
+// 			var message = this.firstElementChild.value;
+// 			socket.emit('message sent', {'m' : message});
+
+
+// 			return false
+// 		};
+// 	});
+
+
+
+// });
+
+
+
+
+
+</script>
+
+
+
+{% endblock %}
