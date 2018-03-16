@@ -19,8 +19,8 @@ Session(app)
 def index():
 
 	# clear all channels
-	session['channel_count'] = 1
-	session['channels'].clear()
+	# session['channel_count'] = 1
+	# session['channels'].clear()
 	return render_template('index.html')
 
 
@@ -48,9 +48,14 @@ def channels():
 	else:
 
 		# create a channel
+		try:
+			session['channels']
+		except:
+			session['channels'] = []
+
+
 		if len(session['channels']) == 0:
 			# create channel list of dicts
-			session['channels'] = []
 			session['channel_count'] = 1
 			count = session['channel_count']
 			session['channels'].append({ 'name': 'channel ' + str(count) , 'messages': []})
@@ -63,11 +68,22 @@ def channels():
 			session['channels'].append({ 'name': 'channel ' + str(count) , 'messages': []})
 
 
-
-	return  render_template('channels.html', channels=session['channels'], cur=session['current_user'])
+	try:
+		return  render_template('channels.html', channels=session['channels'], cur=session['current_user'])
+	except KeyError:
+		return  render_template('channels.html', cur=session['current_user'])
 		# jsonify(session['channels'])
+
 
 
 @app.route("/channels/<string:channel>")
 def channel(channel):
-	return render_template('chat.html')
+	return render_template('chat.html', user=session['current_user'])
+
+
+@socketio.on("message sent")
+def message(info):
+	message = info['m']
+	user = info['u']
+	# return "server has recived emit action"
+	emit('display message', {"new": message, 'user': user}, broadcast=True)

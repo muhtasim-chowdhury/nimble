@@ -5,8 +5,11 @@ Chat
 {% endblock %}
 
 {% block body %}
-
-
+<h1>Your Display Name</h1>
+<h1 id="user">{{ user }}</h1>
+<ul>
+	
+</ul>
 
 <form>
 	<input type="text" name="message" placeholder="Type here..">
@@ -16,25 +19,39 @@ Chat
 
 <script>
 
-// document.addEventListener('DOMContentLoaded', function() {
-// 	// connect to web socket
-// 	var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+document.addEventListener('DOMContentLoaded', function() {
+	// connect to web socket
+	var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-// 	// when connected, configure buttons
-// 	socket.on('connect', () => {
-// 		document.querySelector('form').onsubmit = function() {
-// 			// console.log(this.firstElementChild.value);
-// 			var message = this.firstElementChild.value;
-// 			socket.emit('message sent', {'m' : message});
-
-
-// 			return false
-// 		};
-// 	});
+	// when connected, configure buttons
+	socket.on('connect', () => {
+		document.querySelector('form').onsubmit = function() {
+			console.log(this.firstElementChild.value);
+			var message = this.firstElementChild.value;
+			var user = document.getElementById('user').innerHTML;
+			socket.emit('message sent', {'m' : message, 'u': user});
+			this.reset()
 
 
+			return false
+		};
+	});
 
-// });
+
+	// recieving message from server
+	socket.on('display message', function(data) {
+		console.log('we r now recieving information from the server')
+		items = document.createElement('li');
+		items.innerHTML = "<span>" + data.user + ":</span> " + data.new;
+		document.querySelector('ul').append(items);
+
+	});
+
+
+
+
+
+});
 
 
 
