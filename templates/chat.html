@@ -1,23 +1,51 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Chat
+{{ channel_num }}
 {% endblock %}
 
 {% block body %}
 <h1>Your Display Name</h1>
 <h1 id="user">{{ user }}</h1>
 <ul>
-	
+	{% if messages %}
+		{% for message in messages %}
+		<li>{{ message }}</li>
+		{% endfor %}
+
+	{% endif %}
 </ul>
 
 <form>
-	<input type="text" name="message" placeholder="Type here..">
+	<input type="text" name="message" placeholder="Type here.." autocomplete="off">
 	<button type='submit'>Send</button>
 </form>
 
 
 <script>
+
+function read(date) {
+	var day = date.getDate();
+	var year = date.getFullYear();
+	var month = 1 + date.getMonth();
+	var hour = date.getHours();
+	var murrica = 'AM'
+	if (hour > 11)
+	{
+		murrica = 'PM';
+	}
+	hour %= 12;
+	if (hour == 0) {
+		hour = 12;
+	}
+	var min = date.getMinutes();
+	return month+"/"+day+"/" + year+ " " + hour + ":"+ min + " " + murrica;
+} 
+
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
 	// connect to web socket
@@ -29,7 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
 			console.log(this.firstElementChild.value);
 			var message = this.firstElementChild.value;
 			var user = document.getElementById('user').innerHTML;
-			socket.emit('message sent', {'m' : message, 'u': user});
+			var channel_num = document.title; 
+			var time = new Date();
+			time = read(time);
+			socket.emit('message sent', {'m' : message, 'u': user, 'channel_num': channel_num, 'time': time });
 			this.reset()
 
 
@@ -41,9 +72,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	// recieving message from server
 	socket.on('display message', function(data) {
 		console.log('we r now recieving information from the server')
-		items = document.createElement('li');
-		items.innerHTML = "<span>" + data.user + ":</span> " + data.new;
-		document.querySelector('ul').append(items);
+		if (data.channel_num == document.title) {
+			items = document.createElement('li');
+			items.innerHTML = "<span>" + data.user + ":</span> " + data.new + " <span id='time'>Time: " + data.time + "</span>";
+			document.querySelector('ul').append(items);
+		}
 
 	});
 

@@ -1,26 +1,32 @@
 import os
 
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from flask_socketio import SocketIO, emit
 from flask_session import Session
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 
-# configure session
+
+# Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
-app.config['SESSION_TYPE'] = 'filesystem'
+app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-# session is a dict
+
+
+
+# test global variable
+
+# test = "hello";
+server = dict()
+
 
 
 @app.route("/")
 def index():
 
-	# clear all channels
-	# session['channel_count'] = 1
-	# session['channels'].clear()
 	return render_template('index.html')
 
 
@@ -32,12 +38,12 @@ def channels():
 		# check if user list exists
 		try:
 			# add user if user does not exist in list
-			if not name in session['users']:
-				session['users'].append(name)
+			if not name in server['users']:
+				server['users'].append(name)
 		except KeyError:
 			# if list doesn't exist, create and add user
-			session['users'] = []
-			session['users'].append(name)
+			server['users'] = []
+			server['users'].append(name)
 		except:
 			return "you dun goofed"
 
@@ -49,27 +55,27 @@ def channels():
 
 		# create a channel
 		try:
-			session['channels']
+			server['channels']
 		except:
-			session['channels'] = []
+			server['channels'] = []
 
 
-		if len(session['channels']) == 0:
+		if len(server['channels']) == 0:
 			# create channel list of dicts
-			session['channel_count'] = 1
-			count = session['channel_count']
-			session['channels'].append({ 'name': 'channel ' + str(count) , 'messages': []})
+			server['channel_count'] = 0
+			count = server['channel_count']
+			server['channels'].append({ 'name': str(count) , 'messages': []})
 			# return render_template('channels.html', channels=session['channels'])
 
 		else:
 			# list already exists so just create add another channel
-			session['channel_count'] += 1 
-			count = session['channel_count']
-			session['channels'].append({ 'name': 'channel ' + str(count) , 'messages': []})
+			server['channel_count'] += 1 
+			count = server['channel_count']
+			server['channels'].append({ 'name': str(count) , 'messages': []})
 
 
 	try:
-		return  render_template('channels.html', channels=session['channels'], cur=session['current_user'])
+		return  render_template('channels.html', channels=server['channels'], cur=session['current_user'])
 	except KeyError:
 		return  render_template('channels.html', cur=session['current_user'])
 		# jsonify(session['channels'])
@@ -78,12 +84,25 @@ def channels():
 
 @app.route("/channels/<string:channel>")
 def channel(channel):
-	return render_template('chat.html', user=session['current_user'])
+
+	channel_num = int(channel)
+	# list of messages 
+	messages = server['channels'][channel_num]['messages']
+
+	
+	return render_template('chat.html', user=session['current_user'], messages=messages, channel_num=channel_num)
 
 
 @socketio.on("message sent")
 def message(info):
 	message = info['m']
 	user = info['u']
-	# return "server has recived emit action"
-	emit('display message', {"new": message, 'user': user}, broadcast=True)
+	channel_num = info['channel_num']
+	channel_num = int(channel_num)
+	time = info['time']
+	
+	# add message to messages list to the CORRECT CHANNEL
+	server['channels'][channel_num]['messages'].append( user + ": " + message +" Time: " + time)
+
+
+	emit('display message', {"new": message, 'user': user, 'channel_num': channel_num, 'time': time}, broadcast=True)

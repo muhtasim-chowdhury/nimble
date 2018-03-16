@@ -19,4 +19,9 @@ span {
 	font-weight: bold;
 	font-family: verdana;
 	color: blue;
+	font-size: 15px;
+}
+#time {
+	float: right;
+	margin-right: 3%;
 }
