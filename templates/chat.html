@@ -5,18 +5,21 @@
 {% endblock %}
 
 {% block body %}
+<form action='{{ url_for('channels')}}' method='get'>
+	<button>View Channels</button>
+</form>
 <h1>Your Display Name</h1>
 <h1 id="user">{{ user }}</h1>
 <ul>
 	{% if messages %}
 		{% for message in messages %}
-		<li>{{ message }}</li>
+		<li><span>{{ message.user }}:</span> {{message.message}} <span id='time'>{{ message.time }}</span></li>
 		{% endfor %}
 
 	{% endif %}
 </ul>
 
-<form>
+<form id='form'>
 	<input type="text" name="message" placeholder="Type here.." autocomplete="off">
 	<button type='submit'>Send</button>
 </form>
@@ -39,6 +42,9 @@ function read(date) {
 		hour = 12;
 	}
 	var min = date.getMinutes();
+	if (min < 10) {
+		min = '0' + min;
+	}
 	return month+"/"+day+"/" + year+ " " + hour + ":"+ min + " " + murrica;
 } 
 
@@ -53,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// when connected, configure buttons
 	socket.on('connect', () => {
-		document.querySelector('form').onsubmit = function() {
+		document.getElementById('form').onsubmit = function() {
 			console.log(this.firstElementChild.value);
 			var message = this.firstElementChild.value;
 			var user = document.getElementById('user').innerHTML;
