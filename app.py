@@ -22,6 +22,11 @@ Session(app)
 # test = "hello";
 server = dict()
 
+# message id needed to delete them
+message_id = 0
+
+
+
 
 
 @app.route("/")
@@ -121,13 +126,43 @@ def message(info):
 	channel_num = info['channel_num']
 	channel_num = int(channel_num)
 	time = info['time']
+
+
 	
 	# add message to messages list to the CORRECT CHANNEL
 	# server['channels'][channel_num]['messages'].append( user + ": " + message +" Time: " + time)
-
-	server['channels'][channel_num]['messages'].append( {'user': user, 'message': message, 'time': time})
-	emit('display message', {"new": message, 'user': user, 'channel_num': channel_num, 'time': time}, broadcast=True)
+	global message_id
+	server['channels'][channel_num]['messages'].append( {'user': user, 'message': message, 'time': time, 'id': message_id})
+	message_id += 1
+	emit('display message', {"new": message, 'user': user, 'channel_num': channel_num, 'time': time, 'id': message_id}, broadcast=True)
 
 @app.route("/fuck")
 def fuck():
 	return str(session['current_channel'])
+
+
+
+@app.route("/delete", methods=["POST"])
+def delete():
+	idd = int(request.form.get('id'))
+	channel = int(request.form.get('channel'))
+	
+
+
+	for i in range(len(server['channels'][channel]['messages'])):
+	# for item in server['channels'][channel]['messages']:
+		# if item.id == idd:
+		if server['channels'][channel]['messages'][i]['id'] == idd:
+			
+			server['channels'][channel]['messages'].remove(server['channels'][channel]['messages'][i])
+			return 
+			# "success"
+		
+	return 
+	# "not found"
+
+
+
+
+
+	# delete message

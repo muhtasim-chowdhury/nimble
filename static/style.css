@@ -1,5 +1,6 @@
 body {
-	background: #aaa;
+	background: #1265f666;
+	color: #ffffff;
 }
 h1 {
 	text-align: center;
@@ -18,10 +19,18 @@ input {
 span {
 	font-weight: bold;
 	font-family: verdana;
-	color: blue;
 	font-size: 15px;
 }
 #time {
-	float: right;
+	margin-left: 3%;
 	margin-right: 3%;
+}
+button {
+  background: #ffffff;
+	border-radius: 7px;
+	width: 200px;
+	height: 30px;
+}
+#begone {
+	display: none ;
 }

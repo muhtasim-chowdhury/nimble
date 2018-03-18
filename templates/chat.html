@@ -13,14 +13,14 @@
 <ul>
 	{% if messages %}
 		{% for message in messages %}
-		<li><span>{{ message.user }}:</span> {{message.message}} <span id='time'>{{ message.time }}</span></li>
+		<li><span>{{ message.user }}:</span> {{message.message}} <span id='time'>{{ message.time }}</span><span id='begone'> {{ message.id }}</span><a href='#'>Delete</a></li>
 		{% endfor %}
 
 	{% endif %}
 </ul>
 
 <form id='form'>
-	<input type="text" name="message" placeholder="Type here.." autocomplete="off">
+	<input type="text" name="message" placeholder="Type here.." autocomplete="off" autofocus>
 	<button type='submit'>Send</button>
 </form>
 
@@ -54,13 +54,45 @@ function read(date) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+
+	document.querySelectorAll('a').forEach(function(element) {
+		element.addEventListener('click', function() {
+			element.parentElement.parentElement.removeChild(element.parentElement);
+			// console.log("you deleted a message thorugh js");
+
+			// send an ajax request to delete the message
+			var request = new XMLHttpRequest();
+			request.open('POST', '/delete');
+
+			// request.onload = function() {
+			// 	console.log(request.responseText);
+			// };
+
+
+			const id = new FormData();
+			var message_id = element.parentElement.querySelector('#begone').innerHTML;
+			// console.log("message id is " + message_id);
+			// data.append('currency', currency);
+			id.append('id', message_id);
+			id.append('channel', document.title);
+			request.send(id);
+			return false;
+		})
+	});
+
+
+
+
+
+
+
 	// connect to web socket
 	var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
 	// when connected, configure buttons
 	socket.on('connect', () => {
 		document.getElementById('form').onsubmit = function() {
-			console.log(this.firstElementChild.value);
+			// console.log(this.firstElementChild.value);
 			var message = this.firstElementChild.value;
 			var user = document.getElementById('user').innerHTML;
 			var channel_num = document.title; 
@@ -77,10 +109,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// recieving message from server
 	socket.on('display message', function(data) {
-		console.log('we r now recieving information from the server')
+		// console.log('we r now recieving information from the server')
 		if (data.channel_num == document.title) {
 			items = document.createElement('li');
-			items.innerHTML = "<span>" + data.user + ":</span> " + data.new + " <span id='time'>Time: " + data.time + "</span>";
+			items.innerHTML = "<span>" + data.user + ":</span> " + data.new + " <span id='time'>Time: " + data.time + "</span><span id='begone'>" + data.id +"</span>";
 			document.querySelector('ul').append(items);
 		}
 
